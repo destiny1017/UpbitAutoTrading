@@ -20,29 +20,33 @@ def calc_avg_vol(df):
         sum += df['volume'].shift(i)
     return sum / 60
 
+
+pd.set_option('display.max_row', 500)
+pd.set_option('display.max_columns', None)
+
 st = datetime.datetime.now().timestamp()
 
 # ohlcv(open, high, low, close, volume) 시가, 고가, 저가, 종가, 거래량 데이터 받아오기
 df = pyupbit.get_ohlcv("KRW-ELF", "minute1", 200)
 ed = datetime.datetime.now().timestamp()
-print(df)
 print("소요시간 : ", ed - st)
 
-# sum = 0
-# for i in range(1, 60):
-#     sum += df['volume'][len(df) - i]
+df['holding'] = 0
 
+# 1. 60분간의 평균 거래량 산출
 df['avg_vol'] = np.where(df.index >= df.index[60], calc_avg_vol(df), 0)
 
-# pd.set_option('display.max_row', 500)
-# pd.set_option('display.max_columns', None)
-# print(df)
+# 2. 마지막 분봉의 거래량이 60분 평균 거래량의 10배 이상이고 양봉(시가 < 종가)이면 매수
+# 3. 매수가격 저장
+df['buy_price'] = np.where((df['volume'] > df['avg_vol']*3) & (df['avg_vol'] > 0),
+                           df['close'], 0)
 
-# df['size'] = np.where(df.index > df.index[len(df)-3], 1, 2)
+df['test'] = np.where(df['buy_price'].shift(1) != 0, 1, 0)
+# 매수시 holding값 1로 변경
+# df['holding'] = np.where((df['buy_price'] != 0) & (df.index >= df.index[1]), 1, df['holding'].shift(1))
 
-# # 평균 거래량 계산
-# df['avgVol'] = (df['high'] - df['low']) * 0.5
-#
+
+print(df)
 # # target(매수가), range 컬럼을 한 칸씩 밑으로 내림(.shift(n))
 # df['target'] = df['open'] + df['range'].shift(1)
 #
@@ -62,7 +66,7 @@ df['avg_vol'] = np.where(df.index >= df.index[60], calc_avg_vol(df), 0)
 # print("MDD(%): ", df['dd'].max())
 #
 # # 엑셀로 저장
-df.to_excel("test_result.xlsx")
+# df.to_excel("test_result.xlsx")
 
 
 
