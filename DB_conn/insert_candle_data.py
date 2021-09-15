@@ -12,28 +12,19 @@ def makeDictFactory(cursor):
 
     return createRow
 
-
-# 인코딩 설정
 os.putenv('NLS_LANG', '.UTF8')
-
-# DB연결
 conn = ora.connect('c##upbitpy', '1234', '172.30.1.33:1522/XE')
-
-# 커서 할당
 cursor = conn.cursor()
 
-# 쿼리 실행
-cursor.execute("""
-    select *
-    from test
-""")
+df = pyupbit.get_ohlcv("KRW-ELF", "minute1", 10)
 
-# 딕셔너리변환 함수 오버라이딩
-cursor.rowfactory = makeDictFactory(cursor)
+for i, data in enumerate(df.values.tolist()):
+    qry = "insert into elf_min_1_data values('%s','%d','%d','%d','%d','%d')" % (df.index[i],data[0],data[1],data[2],data[3],data[4])
+    print(qry)
+    cursor.execute(qry)
 
-# 오버라이딩한 함수로 쿼리 결과 받아오기
-rows = cursor.fetchall()
-
-# 결과 출력
-for row in rows:
-    print(row)
+#
+# # 딕셔너리변환 함수 오버라이딩
+# cursor.rowfactory = makeDictFactory(cursor)
+#
+# rows = cursor.fetchall()
