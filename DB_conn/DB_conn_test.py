@@ -17,7 +17,7 @@ def makeDictFactory(cursor):
 os.putenv('NLS_LANG', '.UTF8')
 
 # DB연결
-conn = ora.connect('c##upbitpy', '1234', '172.30.1.33:1522/XE')
+conn = ora.connect('c##upbitpy', '1234', 'localhost:1522/XE')
 
 # 커서 할당
 cursor = conn.cursor()
