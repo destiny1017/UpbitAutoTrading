@@ -38,23 +38,24 @@ cursor = conn.cursor()
 
 st = datetime.datetime.now().timestamp()
 print("호출 시작!!!!", datetime.datetime.now())
-df = pyupbit.get_ohlcv("KRW-ELF", "minute1", 10, to="20210915")
+# df = pyupbit.get_ohlcv("KRW-ELF", "minute1", 1000, to="20210915")
+df = pyupbit.get_ohlcv("KRW-ELF", "minute1", 43200)
 
 ed = datetime.datetime.now().timestamp()
 print("호출 종료!!!!", datetime.datetime.now())
 print("소요시간 : ", ed - st)
 
 for i, data in enumerate(df.values.tolist()):
-    qry = "insert into elf_min_1_data values(" \
+    qry = "insert into elf_min_1 values(" \
           "to_date('%s', 'YYYY-MM-DD HH24:MI:SS'),'%d','%d','%d','%d','%d')" \
           % (df.index[i], data[0], data[1], data[2], data[3], data[4])
-#
-#
-# cursor.execute(qry)
-#
-# conn.commit()
+    cursor.execute(qry)
+    if i % 500 == 0:
+        print("%d rows insert complete..." % i)
 
+conn.commit()
 
+print()
 
 #
 # # 딕셔너리변환 함수 오버라이딩
