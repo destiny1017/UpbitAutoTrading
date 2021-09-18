@@ -25,10 +25,22 @@ cursor.execute("""
 
 cursor.rowfactory = makeDictFactory(cursor)
 rows = cursor.fetchall()
-
+arr = []
+avg_vol = 0
 
 for i, val in enumerate(rows):
-    if i > 60:
-        arr = np.array(rows[i-60:i])
-        avg_vol = np.mean(arr)
-        print(avg_vol)
+    # 최근 60분간의 데이터로 평균 거래량 구하기
+    if i <= 60:
+        arr.append(val['VOLUME'])
+    else:
+        del arr[0]
+        np_arr = np.array(arr)
+        avg_vol = np.mean(np_arr)
+        arr.append(val['VOLUME'])
+
+        # 최근 60분 평균거래량의 10배가 넘는 거래량이 터지는 지점 포착
+        if val['VOLUME'] > avg_vol*10:
+            print("TIME_IDX: %s, val['VOLUME'] : %d, avg_vol: %d" % (val['TIME_IDX'], val['VOLUME'], avg_vol))
+
+
+    # print("time: %s, avg_vol: %d" % (val['TIME_IDX'], avg_vol))
