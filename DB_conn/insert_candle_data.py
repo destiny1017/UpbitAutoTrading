@@ -12,6 +12,7 @@ def makeDictFactory(cursor):
 
     return createRow
 
+
 tickers = pyupbit.get_tickers(fiat="KRW")
 os.putenv('NLS_LANG', '.UTF8')
 conn = ora.connect('c##upbitpy', '1234', 'localhost:1522/XE')
@@ -33,6 +34,40 @@ cursor = conn.cursor()
 #     cursor.execute(qry)
 #
 # conn.commit()
+
+# 현재 DB계정의 테이블리스트 조회
+sel_qry = "select tname from tab"
+cursor.execute(sel_qry)
+cursor.rowfactory = makeDictFactory(cursor)
+table_list = cursor.fetchall()
+
+for ticker in tickers:
+    exist = 0
+    for table in table_list:
+        table = table["TNAME"]
+        if table.split("_")[0] == ticker[4:]:
+            exist = 1
+            break
+
+    # 받아온 종목 중 현재 테이블이 생성 안 된 종목이 있으면 생성
+    if exist != 1:
+        create_qry = """
+            CREATE TABLE "C##UPBITPY"."%s_MIN_1"
+           (	"TIME_IDX" DATE,
+            "OPEN_PRICE" NUMBER,
+            "HIGH_PRICE" NUMBER,
+            "LOW_PRICE" NUMBER,
+            "CLOSE_PRICE" NUMBER,
+            "VOLUME" NUMBER,
+             PRIMARY KEY ("TIME_IDX")
+            )
+        """ % ticker[4:]
+        cursor.execute(create_qry)
+
+conn.commit()
+
+
+quit()
 
 ###### data insert code
 

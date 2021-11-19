@@ -24,8 +24,8 @@ cursor = conn.cursor()
 
 # 쿼리 실행
 cursor.execute("""
-    select *
-    from test
+    select tname
+    from tab
 """)
 
 # 딕셔너리변환 함수 오버라이딩
