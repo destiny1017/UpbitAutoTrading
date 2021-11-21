@@ -54,28 +54,33 @@ cursor = conn.cursor()
 # conn.commit()
 
 
+# DB의 마지막 시간과 현재 시간까지의 차이를 구해 차이만큼의 분봉 데이터 받아오기
+qry = "SELECT max(time_idx) lt FROM LOOM_MIN_1"
+cursor.execute(qry)
+cursor.rowfactory = makeDictFactory(cursor)
+last_row = cursor.fetchall()
+print(last_row[0]['LT'])
+
+
 ###### data insert code
-
-st = datetime.datetime.now().timestamp()
-print("호출 시작!!!!", datetime.datetime.now())
-# df = pyupbit.get_ohlcv("KRW-ELF", "minute1", 1000, to="20210915")
-df = pyupbit.get_ohlcv("KRW-STORJ", "minute1", 43200)
-
-ed = datetime.datetime.now().timestamp()
-print("호출 종료!!!!", datetime.datetime.now())
-print("소요시간 : ", ed - st)
-
-for i, data in enumerate(df.values.tolist()):
-    qry = "insert into storj_min_1 values(" \
-          "to_date('%s', 'YYYY-MM-DD HH24:MI:SS'),'%d','%d','%d','%d','%d')" \
-          % (df.index[i], data[0], data[1], data[2], data[3], data[4])
-    cursor.execute(qry)
-    if i % 1000 == 0:
-        print("%d rows insert complete..." % i)
-
-conn.commit()
-
-print()
+# st = datetime.datetime.now().timestamp()
+# print("호출 시작!!!!", datetime.datetime.now())
+# # df = pyupbit.get_ohlcv("KRW-ELF", "minute1", 1000, to="20210915")
+# df = pyupbit.get_ohlcv("KRW-LOOM", "minute1", 4320)
+#
+# ed = datetime.datetime.now().timestamp()
+# print("호출 종료!!!!", datetime.datetime.now())
+# print("소요시간 : ", ed - st)
+#
+# for i, data in enumerate(df.values.tolist()):
+#     qry = "insert into loom_min_1 values(" \
+#           "to_date('%s', 'YYYY-MM-DD HH24:MI:SS'),'%d','%d','%d','%d','%d')" \
+#           % (df.index[i], data[0], data[1], data[2], data[3], data[4])
+#     cursor.execute(qry)
+#     if i % 1000 == 0:
+#         print("%d rows insert complete..." % i)
+#
+# conn.commit()
 
 #
 # # 딕셔너리변환 함수 오버라이딩
