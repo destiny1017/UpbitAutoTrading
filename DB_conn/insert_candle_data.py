@@ -1,7 +1,7 @@
 import cx_Oracle as ora
 import os
 import pyupbit
-import datetime
+from datetime import datetime
 
 # 쿼리 결과를 dictionary형태로 받아오기위한 함수 오버라이딩
 def makeDictFactory(cursor):
@@ -54,12 +54,42 @@ cursor = conn.cursor()
 # conn.commit()
 
 
-# DB의 마지막 시간과 현재 시간까지의 차이를 구해 차이만큼의 분봉 데이터 받아오기
+######  DB의 마지막 시간과 현재 시간까지의 차이를 구해 차이만큼의 분봉 데이터 받아오기
 qry = "SELECT max(time_idx) lt FROM LOOM_MIN_1"
 cursor.execute(qry)
 cursor.rowfactory = makeDictFactory(cursor)
 last_row = cursor.fetchall()
-print(last_row[0]['LT'])
+last_date = last_row[0]['LT']
+
+# 현재시간과의 차이 구하기
+now = datetime.now()
+diff = now - last_date
+diff_min = int(diff.seconds / 60)
+
+# 차이만큼의 분봉데이터 받아오기
+df = pyupbit.get_ohlcv("KRW-LOOM", "minute1", diff_min)
+
+# 차이만큼의 과거 데이터 삭제
+qry = "DELETE FROM LOOM_MIN_1 " \
+        "WHERE TIME_IDX in (" \
+        "	SELECT TIME_IDX FROM LOOM_MIN_1" \
+        "	WHERE rownum <= %d)" % diff_min
+
+cursor.execute(qry)
+conn.commit()
+
+# 삭제된만큼 새로 받아온 데이터 추가하기
+for i, data in enumerate(df.values.tolist()):
+    qry = "insert into loom_min_1 values(" \
+          "to_date('%s', 'YYYY-MM-DD HH24:MI:SS'),'%d','%d','%d','%d','%d')" \
+          % (df.index[i], data[0], data[1], data[2], data[3], data[4])
+    cursor.execute(qry)
+    if i % 1000 == 0:
+        print("%d rows insert complete..." % i)
+
+conn.commit()
+
+
 
 
 ###### data insert code
