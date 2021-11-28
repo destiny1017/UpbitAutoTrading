@@ -102,7 +102,7 @@ cursor = conn.cursor()
 ###### data insert code
 st = datetime.now().timestamp()
 print("호출 시작!!!!", datetime.now())
-target = "ALGO"
+target = "1INCH"
 # df = pyupbit.get_ohlcv("KRW-ELF", "minute1", 1000, to="20210915")
 df = pyupbit.get_ohlcv("KRW-%s" % target, "minute1", 4320)
 # df = pyupbit.get_ohlcv("KRW-BCHA", "minute1", 4320)
@@ -112,7 +112,7 @@ print("호출 종료!!!!", datetime.now())
 print("소요시간 : ", ed - st)
 
 for i, data in enumerate(df.values.tolist()):
-    qry = "insert into %s_min_1 values(" \
+    qry = 'insert into %s_min_1 values(' \
           "to_date('%s', 'YYYY-MM-DD HH24:MI:SS'),'%d','%d','%d','%d','%d')" \
           % (target, df.index[i], data[0], data[1], data[2], data[3], data[4])
 
@@ -121,6 +121,8 @@ for i, data in enumerate(df.values.tolist()):
         print("%d rows insert complete..." % i)
 
 conn.commit()
+
+
 
 #
 # # 딕셔너리변환 함수 오버라이딩

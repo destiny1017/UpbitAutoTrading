@@ -19,8 +19,8 @@ cursor = conn.cursor()
 
 # 쿼리 실행
 cursor.execute("""
-    SELECT * FROM ELF_MIN_1
-    WHERE time_idx > to_date('2021-09-16 18:32:00', 'YYYY-MM-DD HH24:MI:SS')
+    SELECT * FROM PLA_MIN_1
+    WHERE time_idx > to_date('2021-11-10 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
 """)
 
 cursor.rowfactory = makeDictFactory(cursor)
